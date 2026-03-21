@@ -227,19 +227,6 @@ function GamePage() {
             <div className={styles.gameLayout}>
               <div className={styles.gridArea}>
 
-                {/* Opponent bar (VS) */}
-                {mode === "vs" && opponentPlayer && (
-                  <div className={styles.opponentBar}>
-                    <span className={styles.opponentName}>
-                      {opponentPlayer.name}
-                      {opponentProgress?.isActive && <span className={styles.activeDot} />}
-                    </span>
-                    <div className={styles.track}>
-                      <div className={styles.fill} style={{ width: `${opponentProgress?.progress ?? 0}%` }} />
-                    </div>
-                  </div>
-                )}
-
                 {/* Partner label (Team) */}
                 {mode === "team" && (
                   <PartnerLabel presence={team?.presence ?? {}} myId={playerId} />

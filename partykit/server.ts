@@ -81,7 +81,7 @@ export default class CrosswordServer implements Party.Server {
       case "cellInput":
         return this.handleCellInput(msg.cellIndex, msg.value, sender);
       case "requestCheck":
-        return this.handleCheck(sender);
+        return this.handleCheck(sender, msg as Record<string, unknown>);
       case "requestValidate":
         return this.handleValidate(sender);
       case "presenceUpdate":
