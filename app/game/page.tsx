@@ -269,9 +269,7 @@ function GamePage() {
                     }
                     grid.selectCell(ci);
                   }}
-                  onKeyDown={(e) => {
-                    grid.handleKey(e.key);
-                  }}
+                  onKeyDown={(e) => { grid.handleKey(e.key); }}
                   gridRef={grid.gridRef}
                 />
 

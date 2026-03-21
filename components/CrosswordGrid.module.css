@@ -17,23 +17,24 @@
 }
 
 /* ── Hidden input for keyboard capture ── */
-/* Positioned off-screen so browser treats it as interactive.
-   z-index or opacity tricks can block keyboard events in some browsers.
-   font-size: 16px prevents iOS from zooming on focus. */
+/* MUST use opacity: 0.01 (not 0) and be inside the grid viewport.
+   iOS Safari refuses to show keyboard for opacity:0 or off-screen inputs.
+   Positioned absolutely over the selected cell via inline style. */
 .hiddenInput {
-  position: fixed;
-  left: -9999px;
-  top: 0;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
+  position: absolute;
+  width: calc(100% / var(--grid-size));
+  height: calc(100% / var(--grid-size));
+  opacity: 0.01;
   border: none;
   outline: none;
   padding: 0;
+  margin: 0;
   font-size: 16px;
   background: transparent;
   color: transparent;
   caret-color: transparent;
+  z-index: 5;
+  cursor: pointer;
 }
 
 /* ── Black cell ── */
