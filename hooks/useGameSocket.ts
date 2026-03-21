@@ -215,8 +215,13 @@ export function useGameSocket(playerId: string): GameSocketReturn {
           let next = { ...prev, phase: "finished" as const, winnerId: msg.winnerId, finishedAt: Date.now(), gaveUp: msg.gaveUp };
           // Apply revealed answers to the board when giving up
           if (msg.gaveUp && Object.keys(msg.revealedEntries).length > 0) {
-            if (prev.mode === "vs" && next.vsState?.[playerId]) {
-              next = { ...next, vsState: { ...next.vsState, [playerId]: { ...next.vsState[playerId]!, entries: msg.revealedEntries } } } as typeof next;
+            if (prev.mode === "vs" && next.vsState) {
+              // Apply revealed entries to ALL VS players so both sides see the solution
+              const updatedVsState = { ...next.vsState };
+              for (const pid of Object.keys(updatedVsState)) {
+                updatedVsState[pid] = { ...updatedVsState[pid]!, entries: msg.revealedEntries };
+              }
+              next = { ...next, vsState: updatedVsState } as typeof next;
             } else if (prev.mode === "team" && next.teamState) {
               next = { ...next, teamState: { ...next.teamState, entries: msg.revealedEntries } };
             }

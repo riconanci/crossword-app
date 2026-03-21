@@ -31,6 +31,8 @@ export default class CrosswordServer implements Party.Server {
   private puzzleWithAnswers: PuzzleWithAnswers | null = null;
   /** Fingerprints of recently played puzzles — prevent repeats */
   private playedFingerprints: string[] = [];
+  /** Maps PartyKit connection ID → player UUID */
+  private connToPlayer: Map<string, string> = new Map();
 
   constructor(readonly room: Party.Room) {
     this.roomState = this.makeInitialState();
@@ -55,7 +57,14 @@ export default class CrosswordServer implements Party.Server {
 
   async onClose(conn: Party.Connection) {
     this.markPlayerOffline(conn.id);
-    this.broadcast({ type: "playerLeft", playerId: conn.id });
+    const leavingId = this.connToPlayer.get(conn.id);
+    this.connToPlayer.delete(conn.id);
+    if (leavingId) {
+      const player = this.roomState.players.find((p) => p.id === leavingId);
+      if (player) player.isOnline = false;
+      this.broadcastRoomState();
+    }
+    this.broadcast({ type: "playerLeft", playerId: leavingId ?? conn.id });
     await this.persist();
   }
 
@@ -98,6 +107,8 @@ export default class CrosswordServer implements Party.Server {
   // ── Handlers ─────────────────────────────────────────────────────────────────
 
   private handleJoin(playerId: string, playerName: string, conn: Party.Connection) {
+    // Map this connection to the player UUID so we can look it up later
+    this.connToPlayer.set(conn.id, playerId);
     const existing = this.roomState.players.find((p) => p.id === playerId);
 
     if (existing) {
@@ -540,9 +551,8 @@ export default class CrosswordServer implements Party.Server {
    *  and pass it on "join", we store a mapping. For simplicity in Phase 1,
    *  connection id == player id (client sets this via query param). */
   private getPlayerId(connId: string): string | null {
-    // Connection ID may differ from player UUID — look up by connection id
-    // In our setup the client passes playerId as the connection identifier
-    return this.roomState.players.find((p) => p.id === connId)?.id ?? connId;
+    // Look up the player UUID from the connection ID map
+    return this.connToPlayer.get(connId) ?? null;
   }
 
   private sendTo(conn: Party.Connection, msg: S2CMessage) {
