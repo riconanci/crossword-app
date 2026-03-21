@@ -82,20 +82,13 @@ function GamePage() {
   // Filter out cells the player has clicked to dismiss the red mark
   const wrongCells = allWrongCells.filter((ci) => !dismissedWrongCells.includes(ci));
 
-  // correctCells: cells confirmed correct by the checker.
-  // Only light up AFTER a check has been explicitly run:
-  //   VS mode  → checksRemaining dropped below the starting value (2)
-  //   Team mode → same
-  // We do NOT mark cells correct just because the grid is full — only after a real check.
-  const startingChecks = 2; // CHECKS_PER_GAME constant
-  const checksUsed = mode === "vs"
-    ? startingChecks - (myVs?.checksRemaining ?? startingChecks)
-    : startingChecks - (team?.checksRemaining ?? startingChecks);
-  const checksRun = checksUsed > 0;
-  const correctCells = checksRun
-    ? Object.keys(entries)
+  // correctCells: ONLY cells that were filled at the exact moment Check was pressed
+  // AND were not flagged wrong. Uses the checkedEntries snapshot so that
+  // letters typed AFTER the check are never marked green or locked.
+  const correctCells = checkedEntries
+    ? Object.keys(checkedEntries)
         .map(Number)
-        .filter((ci) => entries[ci] && !wrongCells.includes(ci))
+        .filter((ci) => checkedEntries[ci] && !wrongCells.includes(ci))
     : [];
   const checksLeft = mode === "vs" ? myVs?.checksRemaining ?? 0 : team?.checksRemaining ?? 0;
 
