@@ -305,6 +305,20 @@ export function useGameSocket(playerId: string): GameSocketReturn {
     if (isDemoRef.current) {
       setRoomState((prev) => prev ? demoApplyCellInput(prev, playerId, cellIndex, value) : prev);
     } else {
+      // Optimistically update own entries so letters appear immediately.
+      // Server is authoritative but never echoes VS entries back to sender.
+      setRoomState((prev) => {
+        if (!prev) return prev;
+        if (prev.mode === "vs" && prev.vsState?.[playerId]) {
+          const me = prev.vsState[playerId]!;
+          const entries = { ...me.entries, [cellIndex]: value };
+          return {
+            ...prev,
+            vsState: { ...prev.vsState, [playerId]: { ...me, entries } },
+          };
+        }
+        return prev;
+      });
       sendRef.current({ type: "cellInput", cellIndex, value });
     }
   }, [playerId]);
