@@ -64,6 +64,9 @@ export function useGameSocket(playerId: string): GameSocketReturn {
   const [roomState, setRoomState] = useState<RoomState | null>(null);
   const [opponentProgress, setOpponentProgress] = useState<OpponentProgress | null>(null);
   const [checkedEntries, setCheckedEntries] = useState<Record<number, string> | null>(null);
+
+  // Keep ref in sync for use inside callbacks without stale closure
+  useEffect(() => { roomStateRef.current = roomState; }, [roomState]);
   const [gameEndedBy, setGameEndedBy] = useState<string | null>(null);
 
   const socketRef = useRef<PartySocket | null>(null);
@@ -71,6 +74,7 @@ export function useGameSocket(playerId: string): GameSocketReturn {
   const activeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const fallbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isDemoRef = useRef(false);
+  const roomStateRef = useRef<typeof roomState>(null);
   const playerNameRef = useRef("Player");
 
   // ── Demo mode helpers ──────────────────────────────────────────────────────
@@ -351,7 +355,11 @@ export function useGameSocket(playerId: string): GameSocketReturn {
         setCheckedEntries({ ...currentEntries });
         return prev;
       });
-      sendRef.current({ type: "requestCheck" });
+      sendRef.current({ type: "requestCheck", entries: (() => {
+        const s = roomStateRef.current;
+        if (!s) return {};
+        return s.mode === 'vs' ? (s.vsState?.[playerId]?.entries ?? {}) : (s.teamState?.entries ?? {});
+      })() });
     }
   }, [playerId]);
 

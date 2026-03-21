@@ -800,25 +800,30 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.625rem 1rem;
+  padding: 0.5rem 0.5rem;
   background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
-  z-index: 9;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: min(480px, 92vw);
   min-height: 48px;
 }
 
 .activeClueNav {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  padding: 0.25rem 0.5rem;
+  font-size: 1.75rem;
+  font-weight: 400;
+  color: var(--text-primary);
+  padding: 0.25rem 0.625rem;
   border-radius: var(--radius-md);
   flex-shrink: 0;
-  transition: color var(--duration-fast), background var(--duration-fast);
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--duration-fast);
 }
-.activeClueNav:hover { color: var(--text-primary); background: var(--border); }
+.activeClueNav:hover { background: var(--border); }
 
 .activeClueText {
   flex: 1;
@@ -895,7 +900,9 @@
 /* ── Mobile keyboard wrapper ── */
 .mobileKeyboardWrap {
   width: 100%;
-  /* Sits at the bottom of the playing area */
+  flex-shrink: 0;
+  /* Add extra space so Safari toolbar does not cover bottom row */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /* ── Game scroll area (above keyboard) ── */

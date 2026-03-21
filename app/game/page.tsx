@@ -209,20 +209,6 @@ function GamePage() {
         </div>
       )}
 
-      {/* ── Sticky active clue bar — stays visible when mobile keyboard opens ── */}
-      {phase === "playing" && grid.activeClue && (
-        <div className={styles.activeClueBar}>
-          <button className={styles.activeClueNav} onClick={grid.goPrevClue} aria-label="Previous clue">‹</button>
-          <div className={styles.activeClueText}>
-            <span className={styles.activeClueName}>
-              {grid.activeClue.number}{grid.activeClue.direction === "across" ? "A" : "D"}
-            </span>
-            <span className={styles.activeClueBody}>{grid.activeClue.text}</span>
-          </div>
-          <button className={styles.activeClueNav} onClick={grid.goNextClue} aria-label="Next clue">›</button>
-        </div>
-      )}
-
       <div className={styles.body}>
         {/* ── Lobby ── */}
         {phase === "lobby" && (
@@ -251,7 +237,6 @@ function GamePage() {
                     <div className={styles.track}>
                       <div className={styles.fill} style={{ width: `${opponentProgress?.progress ?? 0}%` }} />
                     </div>
-                    <span className={styles.pct}>{opponentProgress?.progress ?? 0}%</span>
                   </div>
                 )}
 
@@ -279,6 +264,20 @@ function GamePage() {
                   onKeyDown={(e) => { grid.handleKey(e.key); }}
                   gridRef={grid.gridRef}
                 />
+
+                {/* ── Active clue bar — below grid, above action row ── */}
+                {grid.activeClue && (
+                  <div className={styles.activeClueBar}>
+                    <button className={styles.activeClueNav} onClick={grid.goPrevClue} aria-label="Previous clue">‹</button>
+                    <div className={styles.activeClueText}>
+                      <span className={styles.activeClueName}>
+                        {grid.activeClue.number}{grid.activeClue.direction === "across" ? "A" : "D"}
+                      </span>
+                      <span className={styles.activeClueBody}>{grid.activeClue.text}</span>
+                    </div>
+                    <button className={styles.activeClueNav} onClick={grid.goNextClue} aria-label="Next clue">›</button>
+                  </div>
+                )}
 
                 {/* Wrong-answer nudge */}
                 {mode === "vs" && myVs?.isFinished && myVs.isCorrect === false && (
@@ -313,15 +312,7 @@ function GamePage() {
                     Give Up
                   </button>
 
-                  {/* My progress */}
-                  {mode === "vs" && myVs && (
-                    <div className={styles.myProgress}>
-                      <div className={styles.track}>
-                        <div className={`${styles.fill} ${styles.myFill}`} style={{ width: `${myVs.progress}%` }} />
-                      </div>
-                      <span className={styles.pct}>{myVs.progress}%</span>
-                    </div>
-                  )}
+
                 </div>
               </div>
 

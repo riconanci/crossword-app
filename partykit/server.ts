@@ -263,7 +263,7 @@ export default class CrosswordServer implements Party.Server {
     await this.persist();
   }
 
-  private async handleCheck(sender: Party.Connection) {
+  private async handleCheck(sender: Party.Connection, msg?: Record<string, unknown>) {
     if (this.roomState.phase !== "playing") return;
     if (!this.puzzleWithAnswers) return;
 
@@ -277,10 +277,12 @@ export default class CrosswordServer implements Party.Server {
         return;
       }
 
-      const incorrectCells = findIncorrectCells(
-        vs.entries,
-        this.puzzleWithAnswers.answers
-      );
+      // Prefer client-provided entries (avoids race condition with cellInput)
+      const entriesToCheck = msg?.entries as Record<number,string> | undefined;
+      const entries = entriesToCheck ?? vs.entries;
+      // Also sync server state
+      if (entriesToCheck) vs.entries = { ...vs.entries, ...entriesToCheck };
+      const incorrectCells = findIncorrectCells(entries, this.puzzleWithAnswers.answers);
       vs.checksRemaining--;
       vs.incorrectCells = incorrectCells;
 

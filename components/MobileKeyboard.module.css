@@ -3,7 +3,9 @@
 .keyboard {
   width: 100%;
   background: #d1d5db;
-  padding: 6px 4px 8px;
+  padding: 6px 4px;
+  /* Safe area inset for iPhone home bar + extra for browser toolbar */
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
   display: flex;
   flex-direction: column;
   gap: 5px;

@@ -144,6 +144,8 @@ export type C2SMessage =
     }
   | {
       type: "requestCheck";
+      /** Client sends current entries so server can check without waiting for cellInput sync */
+      entries: Record<number, string>;
     }
   | {
       type: "requestValidate";
