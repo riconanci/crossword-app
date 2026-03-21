@@ -1,7 +1,7 @@
 // components/CrosswordGrid.tsx
-// Input: a transparent <input> positioned exactly over the selected cell.
-// This is the most reliable approach on iOS — the input is literally ON the cell,
-// so iOS always shows the keyboard and keystrokes are always captured.
+// iOS input fix: use onTouchStart (not onClick) to call focus() synchronously.
+// iOS only shows the keyboard if focus() is called during a touchstart handler.
+// By the time 'click' fires, iOS has already decided not to show the keyboard.
 
 "use client";
 
@@ -41,19 +41,19 @@ export function CrosswordGrid({
   const onKeyDownRef = useRef(onKeyDown);
   useEffect(() => { onKeyDownRef.current = onKeyDown; }, [onKeyDown]);
 
-  // Focus whenever selected cell changes
+  // Re-focus on programmatic selection changes (arrow keys, clue panel)
   useEffect(() => {
     if (selectedCell !== null) {
       inputRef.current?.focus();
     }
   }, [selectedCell]);
 
-  // Native input listener — most reliable across iOS/Android/desktop
+  // Native event listeners — most reliable across all browsers + iOS
   useEffect(() => {
     const el = inputRef.current;
     if (!el) return;
 
-    function onInput() {
+    function onNativeInput() {
       const val = el!.value;
       el!.value = "";
       if (!val) return;
@@ -63,23 +63,24 @@ export function CrosswordGrid({
       }
     }
 
-    function onKeydown(e: KeyboardEvent) {
-      const action = ["Backspace","Delete","ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Tab"];
-      if (action.includes(e.key)) {
+    function onNativeKeydown(e: KeyboardEvent) {
+      const actionKeys = ["Backspace","Delete","ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Tab"];
+      if (actionKeys.includes(e.key)) {
         e.preventDefault();
         onKeyDownRef.current?.({ key: e.key, preventDefault: () => {} });
       } else if (e.key.length === 1 && /^[a-zA-Z]$/.test(e.key)) {
-        // Desktop: handle letters via keydown, prevent input event double-fire
+        // Desktop: handle here and prevent 'input' event double-fire
         e.preventDefault();
         onKeyDownRef.current?.({ key: e.key.toUpperCase(), preventDefault: () => {} });
       }
+      // On iOS soft keyboard, keydown fires with 'Unidentified' — falls through to 'input'
     }
 
-    el.addEventListener("input", onInput);
-    el.addEventListener("keydown", onKeydown);
+    el.addEventListener("input", onNativeInput);
+    el.addEventListener("keydown", onNativeKeydown);
     return () => {
-      el.removeEventListener("input", onInput);
-      el.removeEventListener("keydown", onKeydown);
+      el.removeEventListener("input", onNativeInput);
+      el.removeEventListener("keydown", onNativeKeydown);
     };
   }, []);
 
@@ -91,7 +92,6 @@ export function CrosswordGrid({
       aria-label={`${size}×${size} crossword grid`}
       role="grid"
     >
-      {/* Input floats off-screen but stays fully interactive */}
       <input
         ref={inputRef}
         className={styles.hiddenInput}
@@ -99,10 +99,9 @@ export function CrosswordGrid({
         inputMode="text"
         autoComplete="off"
         autoCorrect="off"
-        autoCapitalize="off"
+        autoCapitalize="characters"
         spellCheck={false}
         tabIndex={-1}
-        readOnly={false}
         aria-label="crossword input"
       />
 
@@ -134,8 +133,15 @@ export function CrosswordGrid({
             role="gridcell"
             aria-label={`Row ${cell.row + 1} Col ${cell.col + 1}${letter ? `, letter ${letter}` : ""}`}
             aria-selected={isSelected}
+            // onTouchStart: focus MUST happen here for iOS to show keyboard.
+            // 'click' fires too late — iOS has already decided not to show keyboard by then.
+            onTouchStart={(e) => {
+              e.preventDefault(); // prevents ghost click + double-fire
+              inputRef.current?.focus();
+              onCellClick(cell.index);
+            }}
             onClick={() => {
-              // Sync focus for iOS keyboard
+              // Desktop fallback (touch devices use onTouchStart above)
               inputRef.current?.focus();
               onCellClick(cell.index);
             }}

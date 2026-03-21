@@ -1,111 +1,76 @@
 // lib/sounds.ts
-// Web Audio API sound effects — no external dependencies.
-// All sounds are synthesized programmatically so there are no audio files to load.
-// Respects a user preference stored in localStorage ("cw-sounds": "on" | "off").
+// Minimal, clean sound effects via Web Audio API. No files, no dependencies.
+// Inspired by apps like Wordle/NYT — subtle confirmation tones, not game-show effects.
 
 const PREF_KEY = "cw-sounds";
 
 export function getSoundsEnabled(): boolean {
   if (typeof window === "undefined") return false;
-  const v = localStorage.getItem(PREF_KEY);
-  return v === null ? true : v === "on"; // default on
+  return (localStorage.getItem(PREF_KEY) ?? "on") === "on";
 }
-
 export function setSoundsEnabled(on: boolean) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(PREF_KEY, on ? "on" : "off");
+  if (typeof window !== "undefined") localStorage.setItem(PREF_KEY, on ? "on" : "off");
 }
 
-// Lazily created AudioContext (must be created after user gesture)
 let ctx: AudioContext | null = null;
-
 function getCtx(): AudioContext | null {
   if (typeof window === "undefined") return null;
-  if (!ctx) {
-    try { ctx = new AudioContext(); } catch { return null; }
-  }
+  if (!ctx) { try { ctx = new AudioContext(); } catch { return null; } }
   if (ctx.state === "suspended") ctx.resume().catch(() => {});
   return ctx;
 }
 
-function tone(
-  frequency: number,
-  duration: number,
-  type: OscillatorType = "sine",
-  volume = 0.18,
-  startDelay = 0
-) {
-  const c = getCtx();
-  if (!c) return;
-  const osc  = c.createOscillator();
-  const gain = c.createGain();
-  osc.connect(gain);
-  gain.connect(c.destination);
-  osc.type = type;
-  osc.frequency.setValueAtTime(frequency, c.currentTime + startDelay);
-  gain.gain.setValueAtTime(0, c.currentTime + startDelay);
-  gain.gain.linearRampToValueAtTime(volume, c.currentTime + startDelay + 0.005);
-  gain.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + startDelay + duration);
-  osc.start(c.currentTime + startDelay);
-  osc.stop(c.currentTime + startDelay + duration + 0.01);
-}
-
-function play(fn: () => void) {
+function beep(freq: number, dur: number, vol = 0.12, type: OscillatorType = "sine", delay = 0) {
   if (!getSoundsEnabled()) return;
-  try { fn(); } catch {}
+  const c = getCtx(); if (!c) return;
+  const osc = c.createOscillator();
+  const gain = c.createGain();
+  osc.connect(gain); gain.connect(c.destination);
+  osc.type = type;
+  osc.frequency.setValueAtTime(freq, c.currentTime + delay);
+  gain.gain.setValueAtTime(0, c.currentTime + delay);
+  gain.gain.linearRampToValueAtTime(vol, c.currentTime + delay + 0.008);
+  gain.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + delay + dur);
+  osc.start(c.currentTime + delay);
+  osc.stop(c.currentTime + delay + dur + 0.01);
 }
 
-// ── Individual sounds ────────────────────────────────────────────────────────
-
-/** Soft click when a letter key is pressed */
+// Very soft tick — barely there, just tactile feedback
 export function soundKeypress() {
-  play(() => tone(900, 0.04, "triangle", 0.08));
+  beep(1200, 0.03, 0.05, "triangle");
 }
 
-/** Satisfying pop when a full word is completed correctly */
+// Gentle two-note chime — word done
 export function soundWordComplete() {
-  play(() => {
-    tone(523, 0.07, "sine", 0.14);           // C5
-    tone(659, 0.07, "sine", 0.14, 0.07);     // E5
-    tone(784, 0.12, "sine", 0.16, 0.14);     // G5
-  });
+  beep(660, 0.08, 0.10, "sine");
+  beep(880, 0.1,  0.10, "sine", 0.07);
 }
 
-/** Uplifting fanfare on win */
+// Clean, quiet win — two rising notes
 export function soundWin() {
-  play(() => {
-    tone(523, 0.1,  "sine", 0.18);
-    tone(659, 0.1,  "sine", 0.18, 0.1);
-    tone(784, 0.1,  "sine", 0.18, 0.2);
-    tone(1047,0.25, "sine", 0.2,  0.3);
-  });
+  beep(660,  0.1,  0.12, "sine");
+  beep(880,  0.1,  0.12, "sine", 0.1);
+  beep(1100, 0.18, 0.14, "sine", 0.2);
 }
 
-/** Gentle sad tone on loss / gave up */
-export function soundLoss() {
-  play(() => {
-    tone(440, 0.12, "sine", 0.14);
-    tone(392, 0.2,  "sine", 0.14, 0.12);
-  });
-}
-
-/** Low buzz when a check reveals wrong cells */
+// Soft low thud — wrong answer
 export function soundWrong() {
-  play(() => {
-    tone(180, 0.08, "sawtooth", 0.12);
-    tone(160, 0.1,  "sawtooth", 0.1, 0.08);
-  });
+  beep(200, 0.12, 0.10, "sine");
 }
 
-/** Short tick on backspace / delete */
+// Single quiet tap — delete
 export function soundDelete() {
-  play(() => tone(400, 0.04, "triangle", 0.07));
+  beep(500, 0.03, 0.06, "triangle");
 }
 
-/** Soft chime when a check comes back all correct (no wrong cells) */
+// Short clean chime — check passed
 export function soundCheckClear() {
-  play(() => {
-    tone(880, 0.08, "sine", 0.15);
-    tone(1108,0.12, "sine", 0.15, 0.08);
-  });
+  beep(880,  0.08, 0.10, "sine");
+  beep(1100, 0.12, 0.10, "sine", 0.08);
+}
+
+// Soft descending note — gave up / loss
+export function soundLoss() {
+  beep(440, 0.1,  0.10, "sine");
+  beep(350, 0.15, 0.10, "sine", 0.1);
 }
