@@ -17,20 +17,23 @@
 }
 
 /* ── Hidden input for keyboard capture ── */
+/* Positioned off-screen so browser treats it as interactive.
+   z-index or opacity tricks can block keyboard events in some browsers.
+   font-size: 16px prevents iOS from zooming on focus. */
 .hiddenInput {
-  position: absolute;
-  opacity: 0;
+  position: fixed;
+  left: -9999px;
+  top: 0;
   width: 1px;
   height: 1px;
-  top: 0;
-  left: 0;
+  opacity: 0;
   border: none;
   outline: none;
   padding: 0;
-  margin: 0;
-  font-size: 16px; /* prevents iOS zoom */
-  pointer-events: none;
-  z-index: -1;
+  font-size: 16px;
+  background: transparent;
+  color: transparent;
+  caret-color: transparent;
 }
 
 /* ── Black cell ── */

@@ -1,7 +1,7 @@
-// components/CrosswordGrid.tsx — Full NYT-style interactive crossword grid
-// Uses a hidden <input> to capture keyboard input on both desktop and mobile.
-// The input is focused whenever a cell is selected, which triggers the native
-// keyboard on iOS/Android and captures keystrokes on desktop.
+// components/CrosswordGrid.tsx
+// Uses a visually hidden <input> to capture keyboard input.
+// CRITICAL for iOS: inputRef.current?.focus() must be called synchronously
+// inside the cell onClick handler (not in useEffect) for the native keyboard to appear.
 
 "use client";
 
@@ -39,37 +39,40 @@ export function CrosswordGrid({
   const { size, cells } = puzzle;
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  // Focus the hidden input whenever a cell is selected.
-  // This triggers the native keyboard on mobile and ensures keystrokes
-  // are captured on desktop without needing to click the grid div.
+  // Re-focus input when selectedCell changes (handles programmatic navigation
+  // like Tab, arrow keys, clue panel clicks — NOT cell taps, those focus inline)
   useEffect(() => {
     if (selectedCell !== null) {
-      // Small timeout lets React finish rendering before focusing
-      setTimeout(() => inputRef.current?.focus(), 10);
+      inputRef.current?.focus();
     }
   }, [selectedCell]);
 
   function handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    // Prevent default so browser doesn't insert characters into the input
-    if (e.key.length === 1 || ["Backspace","Delete","ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Tab"].includes(e.key)) {
+    const actionKeys = ["Backspace","Delete","ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Tab"];
+    if (e.key.length === 1 || actionKeys.includes(e.key)) {
       e.preventDefault();
     }
     onKeyDown?.(e);
   }
 
-  // On mobile, the input fires an "input" event when the user types.
-  // We intercept it here and translate it to a keydown-style call.
+  // Mobile: onChange fires when user taps a key on the soft keyboard.
+  // keydown is unreliable on iOS so we use this as the primary mobile path.
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
     const val = e.target.value;
-    if (val.length > 0) {
-      const key = val[val.length - 1]!.toUpperCase();
-      if (/^[A-Z]$/.test(key)) {
-        // Simulate a keydown event for the letter
-        onKeyDown?.({ key, preventDefault: () => {} } as React.KeyboardEvent);
-      }
-    }
-    // Always clear the input value so repeated letters work
+    // Clear immediately so repeated same-letter works
     e.target.value = "";
+    if (!val) return;
+    const letter = val[val.length - 1]!.toUpperCase();
+    if (/^[A-Z]$/.test(letter)) {
+      onKeyDown?.({ key: letter, preventDefault: () => {} } as React.KeyboardEvent);
+    }
+  }
+
+  function handleCellClick(cellIndex: number) {
+    // Focus the input SYNCHRONOUSLY here — iOS only shows the keyboard when
+    // focus() is called directly inside a user gesture handler
+    inputRef.current?.focus();
+    onCellClick(cellIndex);
   }
 
   return (
@@ -80,24 +83,21 @@ export function CrosswordGrid({
       aria-label={`${size}×${size} crossword grid`}
       role="grid"
     >
-      {/* Hidden input captures keyboard on both desktop and mobile */}
+      {/* Visually hidden input — positioned off-screen so browser treats it as
+          interactive (avoids z-index issues that block keyboard events) */}
       <input
         ref={inputRef}
         className={styles.hiddenInput}
         type="text"
+        inputMode="text"
         autoComplete="off"
         autoCorrect="off"
         autoCapitalize="characters"
         spellCheck={false}
-        aria-hidden
+        tabIndex={-1}
+        aria-label="crossword input"
         onKeyDown={handleInputKeyDown}
         onChange={handleInputChange}
-        onBlur={() => {
-          // Re-focus if a cell is still selected (e.g. user accidentally blurred)
-          if (selectedCell !== null) {
-            setTimeout(() => inputRef.current?.focus(), 50);
-          }
-        }}
       />
 
       {cells.map((cell) => {
@@ -126,9 +126,9 @@ export function CrosswordGrid({
             key={cell.index}
             className={classes}
             role="gridcell"
-            aria-label={`Row ${cell.row + 1} Col ${cell.col + 1}${letter ? `, letter ${letter}` : ""}${isCorrect ? ", correct" : ""}`}
+            aria-label={`Row ${cell.row + 1} Col ${cell.col + 1}${letter ? `, letter ${letter}` : ""}`}
             aria-selected={isSelected}
-            onClick={() => onCellClick(cell.index)}
+            onClick={() => handleCellClick(cell.index)}
           >
             {cell.startNumber !== null && (
               <span className={styles.cellNum}>{cell.startNumber}</span>

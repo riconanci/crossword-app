@@ -202,6 +202,20 @@ function GamePage() {
         </div>
       )}
 
+      {/* ── Sticky active clue bar — stays visible when mobile keyboard opens ── */}
+      {phase === "playing" && grid.activeClue && (
+        <div className={styles.activeClueBar}>
+          <button className={styles.activeClueNav} onClick={grid.goPrevClue} aria-label="Previous clue">‹</button>
+          <div className={styles.activeClueText}>
+            <span className={styles.activeClueName}>
+              {grid.activeClue.number}{grid.activeClue.direction === "across" ? "A" : "D"}
+            </span>
+            <span className={styles.activeClueBody}>{grid.activeClue.text}</span>
+          </div>
+          <button className={styles.activeClueNav} onClick={grid.goNextClue} aria-label="Next clue">›</button>
+        </div>
+      )}
+
       <div className={styles.body}>
         {/* ── Lobby ── */}
         {phase === "lobby" && (
