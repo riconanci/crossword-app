@@ -113,7 +113,6 @@ export function useGridInput(
         clue.cells.find((ci) => !entries[ci]) ?? clue.cells[0];
       if (target !== undefined) {
         setSelection({ cellIndex: target, direction: clue.direction });
-        gridRef.current?.focus();
       }
     },
     [entries]
@@ -161,7 +160,6 @@ export function useGridInput(
         return { cellIndex, direction: dir };
       });
 
-      gridRef.current?.focus();
     },
     [puzzle]
   );
@@ -318,8 +316,6 @@ export function useGridInput(
     const target = firstAcross.cells[0];
     if (target !== undefined) {
       setSelection({ cellIndex: target, direction: "across" });
-      // Focus the grid so keyboard input works immediately
-      setTimeout(() => gridRef.current?.focus(), 50);
     }
   }, [puzzle?.id]);
 
