@@ -49,6 +49,8 @@ export interface GameSocketReturn {
   requestValidate: () => void;
   requestRestart: () => void;
   requestGiveUp: () => void;
+  requestEndGame: () => void;
+  gameEndedBy: string | null;
   /** Snapshot of entries at the exact moment the last check was performed.
    *  Cells here that are NOT in wrongCells are definitively correct and locked. */
   checkedEntries: Record<number, string> | null;
@@ -62,6 +64,7 @@ export function useGameSocket(playerId: string): GameSocketReturn {
   const [roomState, setRoomState] = useState<RoomState | null>(null);
   const [opponentProgress, setOpponentProgress] = useState<OpponentProgress | null>(null);
   const [checkedEntries, setCheckedEntries] = useState<Record<number, string> | null>(null);
+  const [gameEndedBy, setGameEndedBy] = useState<string | null>(null);
 
   const socketRef = useRef<PartySocket | null>(null);
   const sendRef = useRef<(msg: C2SMessage) => void>(() => {});
@@ -219,6 +222,13 @@ export function useGameSocket(playerId: string): GameSocketReturn {
         // Stats recorded in game/page.tsx via recordGameResult
         break;
 
+      case "gameEnded":
+        // Server already reset state; the following roomState message will update UI.
+        // Store the name so game page can show a brief banner.
+        setGameEndedBy(msg.endedByName);
+        setTimeout(() => setGameEndedBy(null), 4000);
+        break;
+
       case "error":
         console.error("[game] Server error:", msg.message);
         break;
@@ -339,6 +349,18 @@ export function useGameSocket(playerId: string): GameSocketReturn {
     }
   }, [playerId]);
 
+  const requestEndGame = useCallback(() => {
+    if (isDemoRef.current) {
+      // In demo mode just restart
+      setRoomState((prev) => {
+        if (!prev) return prev;
+        return { ...prev, phase: "lobby", puzzle: null, vsState: null, teamState: null, gaveUp: false };
+      });
+    } else {
+      sendRef.current({ type: "requestEndGame" });
+    }
+  }, []);
+
   const requestGiveUp = useCallback(() => {
     if (isDemoRef.current) {
       setRoomState((prev) => {
@@ -376,6 +398,8 @@ export function useGameSocket(playerId: string): GameSocketReturn {
     requestValidate,
     requestRestart,
     requestGiveUp,
+    requestEndGame,
     checkedEntries,
+    gameEndedBy,
   };
 }

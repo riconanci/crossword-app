@@ -90,6 +90,8 @@ export default class CrosswordServer implements Party.Server {
         return this.handleRestart(sender);
       case "requestGiveUp":
         return this.handleGiveUp(sender);
+      case "requestEndGame":
+        return this.handleEndGame(sender);
     }
   }
 
@@ -396,6 +398,25 @@ export default class CrosswordServer implements Party.Server {
       });
     }
 
+    await this.persist();
+  }
+
+
+  private async handleEndGame(sender: Party.Connection) {
+    if (this.roomState.phase !== "playing") return;
+    const player = this.roomState.players.find((p) => p.id === sender.id);
+    const endedByName = player?.name ?? "Someone";
+
+    // Reset state to lobby
+    this.roomState = {
+      ...this.makeInitialState(),
+      players: this.roomState.players.map((p) => ({ ...p, isOnline: p.isOnline })),
+    };
+    this.puzzleWithAnswers = null;
+
+    // Notify all players — they'll show a banner then land in lobby
+    this.broadcast({ type: "gameEnded", endedByName });
+    this.broadcastRoomState();
     await this.persist();
   }
 

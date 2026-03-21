@@ -45,7 +45,9 @@ function GamePage() {
     requestCheck,
     requestRestart,
     requestGiveUp,
+    requestEndGame,
     checkedEntries,
+    gameEndedBy,
   } = useGameSocket(playerId);
 
   // Join once connected
@@ -115,6 +117,7 @@ function GamePage() {
   );
 
   const [confirmingGiveUp, setConfirmingGiveUp] = useState(false);
+  const [confirmingEndGame, setConfirmingEndGame] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
 
   // Reset dismissed cells when a new check result arrives (checksLeft drops)
@@ -184,10 +187,20 @@ function GamePage() {
 
         <div className={styles.topbarRight}>
           {phase === "playing" && <span className={styles.timer}>{fmt(elapsed)}</span>}
+          {phase === "playing" && (
+            <button className={styles.endGameBtn} onClick={() => setConfirmingEndGame(true)}>End</button>
+          )}
           <ConnectionStatus state={connectionState} />
           <ThemeToggle />
         </div>
       </header>
+
+      {/* ── Game ended by other player banner ── */}
+      {gameEndedBy && (
+        <div className={styles.gameEndedBanner}>
+          {gameEndedBy} ended the game
+        </div>
+      )}
 
       <div className={styles.body}>
         {/* ── Lobby ── */}
@@ -297,6 +310,29 @@ function GamePage() {
                 />
               </aside>
             </div>
+
+            {/* ── End Game Confirm Dialog ── */}
+            {confirmingEndGame && (
+              <div className={styles.overlay}>
+                <div className={styles.dialog}>
+                  <h3 className={styles.dialogTitle}>End game?</h3>
+                  <p className={styles.dialogBody}>
+                    This will end the game for both players and return to the lobby. No stats will be recorded.
+                  </p>
+                  <div className={styles.dialogActions}>
+                    <button className={styles.dialogCancel} onClick={() => setConfirmingEndGame(false)}>
+                      Keep playing
+                    </button>
+                    <button
+                      className={styles.dialogConfirm}
+                      onClick={() => { setConfirmingEndGame(false); requestEndGame(); }}
+                    >
+                      End game
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* ── Give Up Confirm Dialog ── */}
             {confirmingGiveUp && (

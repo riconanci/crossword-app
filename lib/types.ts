@@ -161,6 +161,9 @@ export type C2SMessage =
     }
   | {
       type: "requestGiveUp";
+    }
+  | {
+      type: "requestEndGame";
     };
 
 // ─── Server → Client Messages ─────────────────────────────────────────────────
@@ -231,6 +234,11 @@ export type S2CMessage =
       gaveUp: boolean;
       /** Filled when gaveUp=true so clients can show the solved board */
       revealedEntries: Record<number, string>;
+    }
+  | {
+      /** Either player ended the game — both return to lobby */
+      type: "gameEnded";
+      endedByName: string;
     }
   | {
       type: "error";
