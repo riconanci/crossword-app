@@ -118,6 +118,7 @@ function GamePage() {
 
   const [confirmingGiveUp, setConfirmingGiveUp] = useState(false);
   const [confirmingEndGame, setConfirmingEndGame] = useState(false);
+  const [showClues, setShowClues] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
 
   // Reset dismissed cells when a new check result arrives (checksLeft drops)
@@ -294,6 +295,13 @@ function GamePage() {
                   </button>
 
                   <button
+                    className={styles.cluesBtn}
+                    onClick={() => setShowClues(true)}
+                  >
+                    Clues
+                  </button>
+
+                  <button
                     className={styles.giveUpBtn}
                     onClick={() => setConfirmingGiveUp(true)}
                   >
@@ -312,7 +320,7 @@ function GamePage() {
                 </div>
               </div>
 
-              {/* ── Clue panel ── */}
+              {/* ── Clue panel — desktop sidebar only ── */}
               <aside className={styles.clueArea}>
                 <CluePanel
                   clues={puzzle.clues}
@@ -323,6 +331,23 @@ function GamePage() {
                   onNext={grid.goNextClue}
                 />
               </aside>
+
+              {/* ── Mobile clue popup ── */}
+              {showClues && (
+                <div className={styles.clueOverlay} onClick={() => setShowClues(false)}>
+                  <div className={styles.clueSheet} onClick={(e) => e.stopPropagation()}>
+                    <div className={styles.clueSheetHandle} />
+                    <CluePanel
+                      clues={puzzle.clues}
+                      entries={entries}
+                      activeClue={grid.activeClue}
+                      onClueSelect={(clue) => { handleClueSelect(clue); setShowClues(false); }}
+                      onPrev={grid.goPrevClue}
+                      onNext={grid.goNextClue}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* ── End Game Confirm Dialog ── */}

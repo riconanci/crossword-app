@@ -1,7 +1,9 @@
 // components/CrosswordGrid.tsx
-// Uses a visually hidden <input> to capture keyboard input.
-// CRITICAL for iOS: inputRef.current?.focus() must be called synchronously
-// inside the cell onClick handler (not in useEffect) for the native keyboard to appear.
+// Input strategy:
+//   Desktop: onKeyDown fires reliably — we forward directly to handleKey.
+//   iOS/Android: keydown is unreliable for composition. We use a native
+//   'input' event listener (not React synthetic) to read typed characters.
+//   focus() is called SYNCHRONOUSLY inside onClick to trigger iOS keyboard.
 
 "use client";
 
@@ -19,7 +21,7 @@ interface Props {
   direction: Direction;
   activeWordCells: number[];
   onCellClick: (cellIndex: number) => void;
-  onKeyDown?: (e: React.KeyboardEvent) => void;
+  onKeyDown?: (e: React.KeyboardEvent | { key: string; preventDefault: () => void }) => void;
   gridRef: React.RefObject<HTMLDivElement | null>;
 }
 
@@ -38,39 +40,55 @@ export function CrosswordGrid({
 }: Props) {
   const { size, cells } = puzzle;
   const inputRef = useRef<HTMLInputElement | null>(null);
+  // Keep a stable ref to onKeyDown so the native listener can access it
+  const onKeyDownRef = useRef(onKeyDown);
+  useEffect(() => { onKeyDownRef.current = onKeyDown; }, [onKeyDown]);
 
-  // Re-focus input when selectedCell changes (handles programmatic navigation
-  // like Tab, arrow keys, clue panel clicks — NOT cell taps, those focus inline)
+  // Attach a native (non-React) 'input' event listener for mobile.
+  // This fires AFTER the keyboard commits a character — more reliable than
+  // React's synthetic onChange on iOS with autocapitalize.
+  useEffect(() => {
+    const el = inputRef.current;
+    if (!el) return;
+
+    function handleNativeInput() {
+      const val = el!.value;
+      el!.value = ""; // clear immediately so same letter can be typed again
+      if (!val) return;
+      // Read last character — handles both direct input and autocapitalize
+      const ch = val[val.length - 1]!.toUpperCase();
+      if (/^[A-Z]$/.test(ch)) {
+        onKeyDownRef.current?.({ key: ch, preventDefault: () => {} });
+      }
+    }
+
+    el.addEventListener("input", handleNativeInput);
+    return () => el.removeEventListener("input", handleNativeInput);
+  }, []); // only once — stable via ref
+
+  // Re-focus when selection changes programmatically (arrow keys, tab, clue click)
   useEffect(() => {
     if (selectedCell !== null) {
       inputRef.current?.focus();
     }
   }, [selectedCell]);
 
-  function handleInputKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    const actionKeys = ["Backspace","Delete","ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Tab"];
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    const actionKeys = [
+      "Backspace","Delete","ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Tab"
+    ];
     if (e.key.length === 1 || actionKeys.includes(e.key)) {
       e.preventDefault();
     }
-    onKeyDown?.(e);
-  }
-
-  // Mobile: onChange fires when user taps a key on the soft keyboard.
-  // keydown is unreliable on iOS so we use this as the primary mobile path.
-  function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const val = e.target.value;
-    // Clear immediately so repeated same-letter works
-    e.target.value = "";
-    if (!val) return;
-    const letter = val[val.length - 1]!.toUpperCase();
-    if (/^[A-Z]$/.test(letter)) {
-      onKeyDown?.({ key: letter, preventDefault: () => {} } as React.KeyboardEvent);
+    // Letter keys on desktop are handled here via keydown (reliable on desktop)
+    if (e.key.length === 1 || actionKeys.includes(e.key)) {
+      onKeyDown?.(e);
     }
   }
 
   function handleCellClick(cellIndex: number) {
-    // Focus the input SYNCHRONOUSLY here — iOS only shows the keyboard when
-    // focus() is called directly inside a user gesture handler
+    // MUST call focus() synchronously here — iOS only shows keyboard
+    // when focus() is inside a direct user gesture handler
     inputRef.current?.focus();
     onCellClick(cellIndex);
   }
@@ -83,8 +101,7 @@ export function CrosswordGrid({
       aria-label={`${size}×${size} crossword grid`}
       role="grid"
     >
-      {/* Visually hidden input — positioned off-screen so browser treats it as
-          interactive (avoids z-index issues that block keyboard events) */}
+      {/* Hidden input — positioned off-screen, fully interactive */}
       <input
         ref={inputRef}
         className={styles.hiddenInput}
@@ -92,12 +109,11 @@ export function CrosswordGrid({
         inputMode="text"
         autoComplete="off"
         autoCorrect="off"
-        autoCapitalize="characters"
+        autoCapitalize="off"
         spellCheck={false}
         tabIndex={-1}
-        aria-label="crossword input"
-        onKeyDown={handleInputKeyDown}
-        onChange={handleInputChange}
+        aria-label="crossword letter input"
+        onKeyDown={handleKeyDown}
       />
 
       {cells.map((cell) => {
