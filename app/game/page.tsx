@@ -12,6 +12,7 @@ import { CrosswordGrid } from "@/components/CrosswordGrid";
 import { CluePanel } from "@/components/CluePanel";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { DEFAULT_BOARD_SIZE, BOARD_SIZES } from "@/lib/constants";
+import { MobileKeyboard } from "@/components/MobileKeyboard";
 import styles from "./page.module.css";
 import { recordGameResult } from "@/lib/stats";
 import { soundWin, soundLoss } from "@/lib/sounds";
@@ -117,6 +118,11 @@ function GamePage() {
   );
 
   const [confirmingGiveUp, setConfirmingGiveUp] = useState(false);
+  // Detect touch device — show custom keyboard instead of native
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    setIsMobile("ontouchstart" in window || navigator.maxTouchPoints > 0);
+  }, []);
   const [confirmingEndGame, setConfirmingEndGame] = useState(false);
   const [showClues, setShowClues] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -231,6 +237,7 @@ function GamePage() {
         {/* ── Playing ── */}
         {phase === "playing" && puzzle && (
           <>
+            <div className={styles.gameScrollArea}>
             <div className={styles.gameLayout}>
               <div className={styles.gridArea}>
 
@@ -347,6 +354,15 @@ function GamePage() {
                 </div>
               )}
             </div>
+
+            </div>{/* end gameScrollArea */}
+
+            {/* ── Custom mobile keyboard — pinned at bottom on mobile ── */}
+            {isMobile && grid.selection.cellIndex !== null && (
+              <div className={styles.mobileKeyboardWrap}>
+                <MobileKeyboard onKey={(key) => grid.handleKey(key)} />
+              </div>
+            )}
 
             {/* ── End Game Confirm Dialog ── */}
             {confirmingEndGame && (

@@ -1,7 +1,7 @@
 // components/CrosswordGrid.tsx
-// iOS input fix: use onTouchStart (not onClick) to call focus() synchronously.
-// iOS only shows the keyboard if focus() is called during a touchstart handler.
-// By the time 'click' fires, iOS has already decided not to show the keyboard.
+// On desktop: uses a hidden <input> for keyboard capture.
+// On mobile: no input needed — MobileKeyboard component handles all key events.
+// Cell clicks just select the cell; no focus tricks required.
 
 "use client";
 
@@ -41,17 +41,30 @@ export function CrosswordGrid({
   const onKeyDownRef = useRef(onKeyDown);
   useEffect(() => { onKeyDownRef.current = onKeyDown; }, [onKeyDown]);
 
-  // Re-focus on programmatic selection changes (arrow keys, clue panel)
+  // Focus hidden input on desktop when selection changes
   useEffect(() => {
-    if (selectedCell !== null) {
-      inputRef.current?.focus();
+    if (selectedCell !== null && inputRef.current) {
+      // Only focus if NOT a touch device (touch uses MobileKeyboard instead)
+      const isTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+      if (!isTouch) inputRef.current.focus();
     }
   }, [selectedCell]);
 
-  // Native event listeners — most reliable across all browsers + iOS
+  // Desktop keyboard capture via hidden input
   useEffect(() => {
     const el = inputRef.current;
     if (!el) return;
+
+    function onNativeKeydown(e: KeyboardEvent) {
+      const actionKeys = ["Backspace","Delete","ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Tab"];
+      if (actionKeys.includes(e.key)) {
+        e.preventDefault();
+        onKeyDownRef.current?.({ key: e.key, preventDefault: () => {} });
+      } else if (e.key.length === 1 && /^[a-zA-Z]$/.test(e.key)) {
+        e.preventDefault();
+        onKeyDownRef.current?.({ key: e.key.toUpperCase(), preventDefault: () => {} });
+      }
+    }
 
     function onNativeInput() {
       const val = el!.value;
@@ -63,24 +76,11 @@ export function CrosswordGrid({
       }
     }
 
-    function onNativeKeydown(e: KeyboardEvent) {
-      const actionKeys = ["Backspace","Delete","ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Tab"];
-      if (actionKeys.includes(e.key)) {
-        e.preventDefault();
-        onKeyDownRef.current?.({ key: e.key, preventDefault: () => {} });
-      } else if (e.key.length === 1 && /^[a-zA-Z]$/.test(e.key)) {
-        // Desktop: handle here and prevent 'input' event double-fire
-        e.preventDefault();
-        onKeyDownRef.current?.({ key: e.key.toUpperCase(), preventDefault: () => {} });
-      }
-      // On iOS soft keyboard, keydown fires with 'Unidentified' — falls through to 'input'
-    }
-
-    el.addEventListener("input", onNativeInput);
     el.addEventListener("keydown", onNativeKeydown);
+    el.addEventListener("input",   onNativeInput);
     return () => {
-      el.removeEventListener("input", onNativeInput);
       el.removeEventListener("keydown", onNativeKeydown);
+      el.removeEventListener("input",   onNativeInput);
     };
   }, []);
 
@@ -92,17 +92,18 @@ export function CrosswordGrid({
       aria-label={`${size}×${size} crossword grid`}
       role="grid"
     >
+      {/* Hidden input — desktop only, ignored on touch devices */}
       <input
         ref={inputRef}
         className={styles.hiddenInput}
         type="text"
-        inputMode="text"
         autoComplete="off"
         autoCorrect="off"
-        autoCapitalize="characters"
+        autoCapitalize="off"
         spellCheck={false}
         tabIndex={-1}
-        aria-label="crossword input"
+        aria-hidden
+        readOnly={false}
       />
 
       {cells.map((cell) => {
@@ -133,18 +134,7 @@ export function CrosswordGrid({
             role="gridcell"
             aria-label={`Row ${cell.row + 1} Col ${cell.col + 1}${letter ? `, letter ${letter}` : ""}`}
             aria-selected={isSelected}
-            // onTouchStart: focus MUST happen here for iOS to show keyboard.
-            // 'click' fires too late — iOS has already decided not to show keyboard by then.
-            onTouchStart={(e) => {
-              e.preventDefault(); // prevents ghost click + double-fire
-              inputRef.current?.focus();
-              onCellClick(cell.index);
-            }}
-            onClick={() => {
-              // Desktop fallback (touch devices use onTouchStart above)
-              inputRef.current?.focus();
-              onCellClick(cell.index);
-            }}
+            onClick={() => onCellClick(cell.index)}
           >
             {cell.startNumber !== null && (
               <span className={styles.cellNum}>{cell.startNumber}</span>

@@ -1,0 +1,71 @@
+/* components/MobileKeyboard.module.css */
+
+.keyboard {
+  width: 100%;
+  background: #d1d5db;
+  padding: 6px 4px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  user-select: none;
+  -webkit-user-select: none;
+  flex-shrink: 0;
+}
+
+[data-theme="dark"] .keyboard {
+  background: #1a1a1a;
+}
+
+.row {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+
+.key {
+  flex: 1;
+  max-width: 42px;
+  height: 44px;
+  background: #ffffff;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #000;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.08s;
+  border: none;
+  touch-action: manipulation;
+}
+
+[data-theme="dark"] .key {
+  background: #3a3a3c;
+  color: #fff;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.5);
+}
+
+.key:active {
+  background: #aaa;
+}
+[data-theme="dark"] .key:active {
+  background: #555;
+}
+
+/* ⌫ and → keys are slightly wider + darker */
+.keySpecial {
+  background: #adb5bd;
+  max-width: 52px;
+  font-size: 0.9rem;
+}
+[data-theme="dark"] .keySpecial {
+  background: #2c2c2e;
+}
+.keySpecial:active {
+  background: #888;
+}
+[data-theme="dark"] .keySpecial:active {
+  background: #444;
+}
