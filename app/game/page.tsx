@@ -236,16 +236,12 @@ function GamePage() {
                   direction={grid.selection.direction}
                   activeWordCells={grid.activeWordCells}
                   onCellClick={(ci) => {
-                    // If cell is wrong, clicking it dismisses the red mark
                     if (allWrongCells.includes(ci) && !dismissedWrongCells.includes(ci)) {
                       setDismissedWrongCells((prev) => [...prev, ci]);
                     }
                     grid.selectCell(ci);
                   }}
                   onKeyDown={(e) => {
-                    if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," ","Tab"].includes(e.key)) {
-                      e.preventDefault();
-                    }
                     grid.handleKey(e.key);
                   }}
                   gridRef={grid.gridRef}
