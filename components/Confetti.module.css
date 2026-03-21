@@ -1,0 +1,42 @@
+/* components/Confetti.module.css */
+
+.container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 200;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  /* Start from bottom-center of the screen, burst upward */
+  left: 50%;
+  top: 60%;
+  width: var(--size);
+  height: calc(var(--size) * 0.4);
+  background: var(--color);
+  border-radius: 2px;
+  animation: burst 2.6s var(--delay, 0s) ease-out forwards;
+  transform-origin: center;
+  will-change: transform, opacity;
+}
+
+@keyframes burst {
+  0% {
+    transform: translate(-50%, -50%) rotate(var(--rot));
+    opacity: 1;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform:
+      translate(
+        calc(-50% + var(--x) * 300px),
+        calc(-50% + var(--y) * 300px + 600px)
+      )
+      rotate(calc(var(--rot) + 720deg));
+    opacity: 0;
+  }
+}

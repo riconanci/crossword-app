@@ -1,0 +1,314 @@
+/* app/page.module.css */
+
+/* ── Page wrapper ── */
+.page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-overlay);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logoMark {
+  font-size: 1.1rem;
+  color: var(--accent-warm);
+  animation: spin 8s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.logoText {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.navBtn {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  padding: 0.375rem 0.75rem;
+  border-radius: var(--radius-full);
+  transition: color var(--duration-fast), background var(--duration-fast);
+}
+
+.navBtn:hover {
+  color: var(--text-primary);
+  background: var(--border);
+}
+
+/* ── Main ── */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  gap: 2.5rem;
+  animation: fadeUp 0.5s var(--ease-out) both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Hero text ── */
+.hero {
+  text-align: center;
+}
+
+.heroTitle {
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  color: var(--text-primary);
+  margin-bottom: 0.875rem;
+}
+
+.heroSub {
+  font-size: 1.0625rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+/* ── Config card ── */
+.card {
+  width: 100%;
+  max-width: 480px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  box-shadow: var(--shadow-md);
+}
+
+/* ── Field groups ── */
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+/* ── Name input ── */
+.input {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
+}
+
+.input::placeholder { color: var(--text-tertiary); }
+
+.input:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(15,15,15,0.06);
+}
+
+/* ── Segmented mode control ── */
+.segmentedControl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.segment {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.125rem;
+  padding: 0.875rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  transition: border-color var(--duration-fast), background var(--duration-fast),
+              box-shadow var(--duration-fast);
+  text-align: left;
+}
+
+.segment:hover {
+  border-color: var(--border-strong);
+}
+
+.segmentActive {
+  border-color: var(--text-primary) !important;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+/* VS mode active gets warm accent */
+.segmentActive[data-mode="vs"] {
+  border-color: var(--accent-warm) !important;
+  background: rgba(255, 107, 53, 0.04);
+}
+
+/* Team mode active gets cool accent */
+.segmentActive[data-mode="team"] {
+  border-color: var(--accent-cool) !important;
+  background: rgba(14, 165, 233, 0.04);
+}
+
+.segmentIcon {
+  font-size: 1.125rem;
+  line-height: 1;
+  margin-bottom: 0.25rem;
+}
+
+.segmentLabel {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.segmentDesc {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+/* ── Size buttons ── */
+.sizeRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.sizeBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.125rem;
+  padding: 0.75rem 0.5rem;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+  transition: border-color var(--duration-fast), background var(--duration-fast);
+}
+
+.sizeBtn:hover { border-color: var(--border-strong); }
+
+.sizeBtnActive {
+  border-color: var(--text-primary) !important;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.sizeDim {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  font-family: 'DM Mono', monospace;
+  color: var(--text-primary);
+}
+
+.sizeDifficulty {
+  font-size: 0.6875rem;
+  color: var(--text-tertiary);
+  font-weight: 500;
+}
+
+/* ── Start button ── */
+.startBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  width: 100%;
+  padding: 0.875rem 1.5rem;
+  background: var(--text-primary);
+  color: var(--text-inverse);
+  border-radius: var(--radius-lg);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  transition: opacity var(--duration-fast), transform var(--duration-fast);
+}
+
+.startBtn:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+.startBtn:active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* VS mode start button */
+.startBtn[data-mode="vs"] {
+  background: var(--accent-warm);
+}
+
+/* Team mode start button */
+.startBtn[data-mode="team"] {
+  background: var(--accent-cool);
+}
+
+.startArrow {
+  font-size: 1.125rem;
+  transition: transform var(--duration-fast);
+}
+
+.startBtn:hover .startArrow {
+  transform: translateX(3px);
+}
+
+/* ── Room note ── */
+.roomNote {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+.mono {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.8125rem;
+}

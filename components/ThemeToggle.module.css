@@ -1,0 +1,23 @@
+/* components/ThemeToggle.module.css */
+.toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.125rem;
+  height: 2.125rem;
+  border-radius: var(--radius-full);
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  transition: background var(--duration-fast), border-color var(--duration-fast),
+              transform var(--duration-fast);
+}
+
+.toggle:hover {
+  background: var(--border);
+  transform: scale(1.05);
+}
+
+.icon {
+  font-size: 0.9375rem;
+  line-height: 1;
+}

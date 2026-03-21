@@ -1,0 +1,147 @@
+/* components/CrosswordGrid.module.css */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--grid-size), 1fr);
+  gap: 0;
+  border: 2.5px solid var(--cell-black);
+  border-radius: 4px;
+  overflow: hidden;
+  width: 100%;
+  max-width: min(480px, 92vw);
+  aspect-ratio: 1;
+  outline: none;
+  box-shadow: var(--shadow-md);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ── Black cell ── */
+.cellBlack {
+  background: var(--cell-black);
+  aspect-ratio: 1;
+}
+
+/* ── White cell base ── */
+.cell {
+  background: var(--cell-bg);
+  border: 1px solid #c8c8c8;
+  aspect-ratio: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--duration-fast);
+  overflow: hidden;
+}
+
+[data-theme="dark"] .cell {
+  border-color: #333;
+}
+
+/* ── Cell states ── */
+.cellInWord  { background: var(--cell-word); }
+.cellSelected { background: var(--cell-selected) !important; }
+.cellWrong   { background: var(--cell-wrong) !important; }
+.cellPartner { background: var(--cell-partner); }
+
+/* Wrong + selected */
+.cellSelected.cellWrong { background: #ffb3ad !important; }
+
+/* ── Correct / locked cells ────────────────────────────────────────────────── */
+.cellCorrect {
+  background: #dcfce7 !important;        /* clear green — confirmed correct    */
+}
+[data-theme="dark"] .cellCorrect {
+  background: #14532d !important;
+}
+/* Selected-on-correct: keep yellow focus, still show it's locked */
+.cellSelected.cellCorrect {
+  background: var(--cell-selected) !important;
+  outline: 2px inset #16a34a;
+}
+/* In-word highlight on correct */
+.cellInWord.cellCorrect {
+  background: #bbf7d0 !important;
+}
+[data-theme="dark"] .cellInWord.cellCorrect {
+  background: #166534 !important;
+}
+
+/* ── Clue number ── */
+.cellNum {
+  position: absolute;
+  top: 2px;
+  left: 3px;
+  font-family: 'DM Mono', monospace;
+  /* Scale with grid size: bigger on 5x5, smaller on 11x11 */
+  font-size: clamp(0.65rem, calc(12vw / var(--grid-size, 7)), 1.5rem);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--cell-number);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Letter — scales with cell size ── */
+.cellLetter {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  /* Scale inversely with grid size: bigger cells on smaller grids get bigger letters.
+     5×5 → ~2rem, 7×7 → ~1.6rem, 11×11 → ~1.1rem  */
+  font-size: clamp(1.3rem, calc(42vw / var(--grid-size, 7)), 3.5rem);
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Correct letter — solid green + heavy weight signals locked */
+.cellCorrect .cellLetter {
+  color: #15803d;
+  font-weight: 800;
+}
+[data-theme="dark"] .cellCorrect .cellLetter {
+  color: #4ade80;
+  font-weight: 800;
+}
+
+/* Clue number also turns green on correct cells */
+.cellCorrect .cellNum {
+  color: #15803d;
+}
+[data-theme="dark"] .cellCorrect .cellNum {
+  color: #4ade80;
+}
+
+/* Cursor: locked cells should signal they can't be edited */
+.cellCorrect {
+  cursor: default;
+}
+
+/* On small screens keep letters proportional */
+@media (max-width: 380px) {
+  .cellLetter {
+    font-size: clamp(1.1rem, calc(36vw / var(--grid-size, 7)), 2.8rem);
+  }
+  .cellNum {
+    font-size: clamp(0.55rem, calc(9vw / var(--grid-size, 7)), 1.1rem);
+  }
+}
+
+/* ── Lock dot — tiny green dot shown in top-right of correct cells with no number ── */
+.lockDot {
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #16a34a;
+  pointer-events: none;
+  z-index: 2;
+}
+[data-theme="dark"] .lockDot {
+  background: #4ade80;
+}

@@ -1,0 +1,189 @@
+/* components/CluePanel.module.css */
+.panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 200px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.placeholder {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  font-size: 0.8125rem;
+  color: var(--text-tertiary);
+  text-align: center;
+}
+
+/* ── Active clue banner with prev/next ── */
+.activeBanner {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--cell-word);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  min-height: 48px;
+}
+
+/* Prev / Next arrow buttons */
+.navBtn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 48px;
+  font-size: 1.375rem;
+  line-height: 1;
+  color: var(--text-secondary);
+  border-radius: 0;
+  transition: background var(--duration-fast), color var(--duration-fast);
+  user-select: none;
+}
+
+.navBtn:hover {
+  background: var(--border);
+  color: var(--text-primary);
+}
+
+.navBtn:active {
+  background: var(--cell-selected);
+  color: var(--text-primary);
+}
+
+/* Clue text area between buttons */
+.bannerBody {
+  flex: 1;
+  display: flex;
+  align-items: baseline;
+  gap: 0.375rem;
+  padding: 0.5rem 0.25rem;
+  min-width: 0;             /* allow text truncation */
+}
+
+.bannerLabel {
+  display: flex;
+  align-items: baseline;
+  gap: 0.2em;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+
+.bannerDir {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+}
+
+.bannerText {
+  font-size: 0.8125rem;
+  color: var(--text-primary);
+  line-height: 1.4;
+  /* allow long clues to wrap inside the banner */
+  white-space: normal;
+}
+
+/* ── Tabs ── */
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  flex-shrink: 0;
+}
+
+.tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.625rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-bottom: 2px solid transparent;
+  transition: color var(--duration-fast), border-color var(--duration-fast);
+}
+
+.tab:hover { color: var(--text-primary); }
+
+.tabActive {
+  color: var(--text-primary);
+  border-bottom-color: var(--text-primary);
+}
+
+.tabCount {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  background: var(--border);
+  padding: 0.1em 0.4em;
+  border-radius: var(--radius-full);
+}
+
+/* ── Clue list ── */
+.list {
+  list-style: none;
+  overflow-y: auto;
+  flex: 1;
+  padding: 0.25rem;
+}
+
+.clueItem {
+  display: flex;
+  align-items: baseline;
+  gap: 0.625rem;
+  width: 100%;
+  padding: 0.4375rem 0.625rem;
+  border-radius: var(--radius-sm);
+  text-align: left;
+  transition: background var(--duration-fast);
+}
+
+.clueItem:hover { background: var(--bg); }
+
+.clueActive {
+  background: var(--cell-word) !important;
+}
+
+/* Completed clue — muted so incomplete ones pop */
+.clueDone .clueNum,
+.clueDone .clueText {
+  opacity: 0.38;
+}
+
+.clueNum {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  min-width: 1.5rem;
+  flex-shrink: 0;
+}
+
+.clueText {
+  font-size: 0.8125rem;
+  color: var(--text-primary);
+  line-height: 1.4;
+  flex: 1;
+}
+
+/* Green checkmark for completed clues */
+.checkMark {
+  font-size: 0.6875rem;
+  color: #22c55e;
+  flex-shrink: 0;
+  margin-left: auto;
+}

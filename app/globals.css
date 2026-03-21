@@ -1,0 +1,175 @@
+/* app/globals.css */
+/* Design system: Apple-clean — generous whitespace, system typography, subtle depth */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
+
+/* ── Tokens ── */
+:root {
+  /* Surfaces */
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-overlay: rgba(255, 255, 255, 0.85);
+
+  /* Text */
+  --text-primary: #0f0f0f;
+  --text-secondary: #6b6b6b;
+  --text-tertiary: #a8a8a8;
+  --text-inverse: #ffffff;
+
+  /* Borders */
+  --border: #e8e8e8;
+  --border-strong: #c8c8c8;
+  --border-focus: #0f0f0f;
+
+  /* Grid */
+  --cell-bg: #ffffff;
+  --cell-black: #1a1a1a;
+  --cell-selected: #ffd60a;      /* warm yellow — NYT-like */
+  --cell-word: #fff3b0;           /* soft highlight for active word */
+  --cell-wrong: #ffdad6;          /* soft red for wrong cells */
+  --cell-partner: #ddf4ff;        /* soft blue for partner presence */
+  --cell-number: #0f0f0f;
+
+  /* Accents */
+  --accent: #0f0f0f;
+  --accent-warm: #ff6b35;         /* vs mode — competitive warm */
+  --accent-cool: #0ea5e9;         /* team mode — collaborative cool */
+
+  /* Status */
+  --success: #16a34a;
+  --error: #dc2626;
+  --warning: #d97706;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.04);
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* Timing */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 120ms;
+  --duration-normal: 200ms;
+  --duration-slow: 360ms;
+}
+
+/* ── Dark theme ── */
+[data-theme="dark"] {
+  --bg: #0a0a0a;
+  --surface: #141414;
+  --surface-raised: #1c1c1c;
+  --surface-overlay: rgba(20, 20, 20, 0.90);
+
+  --text-primary: #f5f5f5;
+  --text-secondary: #888888;
+  --text-tertiary: #555555;
+  --text-inverse: #0f0f0f;
+
+  --border: #282828;
+  --border-strong: #3a3a3a;
+  --border-focus: #f5f5f5;
+
+  --cell-bg: #1c1c1c;
+  --cell-black: #050505;
+  --cell-selected: #ffd60a;
+  --cell-word: #2d2700;
+  --cell-wrong: #3d0a0a;
+  --cell-partner: #001e2d;
+  --cell-number: #f5f5f5;
+
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.5);
+}
+
+/* ── Accent: Warm (orange) ── */
+[data-accent="warm"] {
+  --accent: #ff6b35;
+}
+
+/* ── Accent: Cool (blue) ── */
+[data-accent="cool"] {
+  --accent: #0ea5e9;
+}
+
+/* ── Reset ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+  tab-size: 2;
+}
+
+body {
+  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+  background-color: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color var(--duration-slow) var(--ease-out),
+              color var(--duration-slow) var(--ease-out);
+}
+
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+input { font-family: inherit; }
+
+/* ── Utility classes ── */
+.mono {
+  font-family: 'DM Mono', 'Menlo', monospace;
+  font-size: 0.9em;
+}
+
+/* ── Layout ── */
+.container {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* ── Page transition ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.page-enter {
+  animation: fadeUp var(--duration-slow) var(--ease-out) both;
+}
+
+/* ── Focus visible ── */
+:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: var(--radius-full);
+}
+
+/* ── Selection ── */
+::selection {
+  background: var(--cell-selected);
+  color: var(--text-primary);
+}
