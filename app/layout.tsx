@@ -16,8 +16,10 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  minimumScale: 1,
   maximumScale: 1,
-  viewportFit: "cover",  // Allows content to extend under Safari notch/home bar
+  userScalable: false,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({

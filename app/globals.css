@@ -126,7 +126,8 @@ body {
 }
 
 a { color: inherit; text-decoration: none; }
-button { font-family: inherit; cursor: pointer; border: none; background: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; touch-action: manipulation; }
+div[role="gridcell"] { touch-action: manipulation; }
 input { font-family: inherit; }
 
 /* ── Utility classes ── */
