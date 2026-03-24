@@ -406,3 +406,10 @@
   font-family: 'DM Mono', monospace;
   font-size: 0.8125rem;
 }
+
+.gameActiveNote {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+  text-align: center;
+  margin-top: -0.25rem;
+}

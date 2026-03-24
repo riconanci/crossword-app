@@ -137,6 +137,8 @@ export function useGameSocket(playerId: string): GameSocketReturn {
         break;
 
       case "gameStarted":
+        setCheckedEntries(null); // reset check snapshot for new game
+        if (typeof window !== 'undefined') localStorage.setItem('cw-game-active', 'yes');
         setRoomState((prev) =>
           prev
             ? {
@@ -209,6 +211,7 @@ export function useGameSocket(playerId: string): GameSocketReturn {
         break;
 
       case "gameOver":
+        if (typeof window !== 'undefined') localStorage.removeItem('cw-game-active');
         if (msg.gaveUp) { soundLoss(); }
         setRoomState((prev) => {
           if (!prev) return prev;
@@ -303,6 +306,7 @@ export function useGameSocket(playerId: string): GameSocketReturn {
 
   const startGame = useCallback((mode: GameMode, size: BoardSize) => {
     if (isDemoRef.current) {
+      setCheckedEntries(null);
       const newState = demoStartGame(playerId, playerNameRef.current, mode, size);
       setRoomState(newState);
     } else {
@@ -403,6 +407,7 @@ export function useGameSocket(playerId: string): GameSocketReturn {
 
   const requestRestart = useCallback(() => {
     setCheckedEntries(null);
+    if (typeof window !== "undefined") localStorage.removeItem("cw-game-active");
     if (isDemoRef.current) {
       const base = demoRestart(playerId);
       setRoomState({ ...base, puzzle: null, vsState: null, teamState: null });
