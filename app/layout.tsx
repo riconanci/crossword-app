@@ -7,12 +7,17 @@ export const metadata: Metadata = {
   title: "Crossword — 2 Player",
   description: "Play crossword vs your partner or solve together in real time",
   icons: { icon: "/favicon.svg" },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,  // Prevent zoom on mobile input focus
+  maximumScale: 1,
+  viewportFit: "cover",  // Allows content to extend under Safari notch/home bar
 };
 
 export default function RootLayout({

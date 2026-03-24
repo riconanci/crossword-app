@@ -10,7 +10,7 @@ import styles from "./MobileKeyboard.module.css";
 const ROWS = [
   ["Q","W","E","R","T","Y","U","I","O","P"],
   ["A","S","D","F","G","H","J","K","L"],
-  ["⌫","Z","X","C","V","B","N","M","→"],
+  ["Z","X","C","V","B","N","M","→"],
 ];
 
 interface Props {
@@ -23,9 +23,8 @@ export function MobileKeyboard({ onKey }: Props) {
       {ROWS.map((row, ri) => (
         <div key={ri} className={styles.row}>
           {row.map((key) => {
-            const isBackspace = key === "⌫";
-            const isNext      = key === "→";
-            const isSpecial   = isBackspace || isNext;
+            const isNext    = key === "→";
+            const isSpecial = isNext;
             return (
               <button
                 key={key}
@@ -33,8 +32,7 @@ export function MobileKeyboard({ onKey }: Props) {
                 // onPointerDown for instant response — don't wait for click
                 onPointerDown={(e) => {
                   e.preventDefault(); // prevent any focus change
-                  if (isBackspace) onKey("Backspace");
-                  else if (isNext)  onKey("Tab");
+                  if (isNext)  onKey("Tab");
                   else              onKey(key);
                 }}
               >

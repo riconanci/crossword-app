@@ -292,6 +292,14 @@ function GamePage() {
                     Give Up
                   </button>
 
+                  {isMobile && grid.selection.cellIndex !== null && (
+                    <button
+                      className={styles.deleteBtn}
+                      onPointerDown={(e) => { e.preventDefault(); grid.handleKey("Backspace"); }}
+                    >
+                      ⌫
+                    </button>
+                  )}
 
                 </div>
               </div>

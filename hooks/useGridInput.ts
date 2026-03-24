@@ -231,14 +231,17 @@ export function useGridInput(
 
       // ── Backspace ─────────────────────────────────────────────────────────
       if (key === "Backspace") {
+        soundDelete(); hapticDelete();
+        const clue = getActiveClue(selection);
+        const pos = clue ? clue.cells.indexOf(selection.cellIndex) : -1;
+
         if (entries[selection.cellIndex] && !correctCells.includes(selection.cellIndex)) {
+          // Cell has a letter — clear it and stay
           onInput(selection.cellIndex, "");
-        } else if (!entries[selection.cellIndex] || correctCells.includes(selection.cellIndex)) {
-          // Move back, skipping locked cells
-          const clue = getActiveClue(selection);
-          if (clue) {
-            const pos = clue.cells.indexOf(selection.cellIndex);
-            // Find previous unlocked cell
+        } else {
+          // Cell is empty or locked — move backward
+          if (clue && pos > 0) {
+            // Find previous unlocked cell within this word
             let prev: number | null = null;
             for (let i = pos - 1; i >= 0; i--) {
               const ci = clue.cells[i]!;
@@ -247,9 +250,27 @@ export function useGridInput(
             if (prev !== null) {
               onInput(prev, "");
               setSelection((s) => ({ ...s, cellIndex: prev! }));
-            } else if (pos > 0) {
-              // All previous cells are locked — just move cursor back
+            } else {
+              // All previous cells locked — just move cursor
               setSelection((s) => ({ ...s, cellIndex: clue.cells[pos - 1]! }));
+            }
+          } else if (clue && pos === 0 && puzzle) {
+            // At the FIRST cell of this word — jump to last cell of previous clue
+            const clues = puzzle.clues;
+            const currentIdx = clues.findIndex(
+              (c) => c.number === clue.number && c.direction === clue.direction
+            );
+            if (currentIdx > 0) {
+              const prevClue = clues[currentIdx - 1]!;
+              // Land on the last unlocked cell of the previous word
+              let target = prevClue.cells[prevClue.cells.length - 1]!;
+              for (let i = prevClue.cells.length - 1; i >= 0; i--) {
+                if (!correctCells.includes(prevClue.cells[i]!)) {
+                  target = prevClue.cells[i]!;
+                  break;
+                }
+              }
+              setSelection({ cellIndex: target, direction: prevClue.direction });
             }
           }
         }

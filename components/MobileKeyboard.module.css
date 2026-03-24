@@ -59,8 +59,9 @@
 /* ⌫ and → keys are slightly wider + darker */
 .keySpecial {
   background: #adb5bd;
-  max-width: 52px;
-  font-size: 0.9rem;
+  max-width: 64px;
+  font-size: 0.85rem;
+  font-weight: 600;
 }
 [data-theme="dark"] .keySpecial {
   background: #2c2c2e;
